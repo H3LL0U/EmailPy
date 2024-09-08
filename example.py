@@ -27,9 +27,7 @@ if __name__ == "__main__":
                                        config["PORT"],
                                        config["EMAIL"],
                                        config["PASSWORD"])
-
-
-
+    print("Session started")
     while session.is_alive():
         
         test_email =email_constructor(
@@ -41,9 +39,9 @@ if __name__ == "__main__":
 
         )
 
-        session.add_command(command_objects.SendMessageCommand(test_email,config["RECIEVER_EMAIL"]))
+        session.send_email(test_email,config["RECIEVER_EMAIL"])
         
-        session.add_command(command_objects.TerminateCommand(1))
+        session.terminate()
 
-    print("closed")
+    print("Session closed")
         
