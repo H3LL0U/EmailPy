@@ -1,2 +1,1 @@
-This is a simple library for automation of sending out Emails using
-SMTP protocol
+SMTP and IMAP protocols within a singular Session object!
