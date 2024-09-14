@@ -1,9 +1,10 @@
 import threading
-import command_objects
+
 import smtplib
 import time
 from email.message import EmailMessage
 from imap_tools import MailBox, NOT
+import imaplib
 class Session():
     def __init__(self,sender_email:str,sender_password:str, mode:str,server_email_SMTP:str|None = None,server_port_SMTP:str|None = None,server_email_IMAP:str=None,server_port_IMAP:str|None = None) -> None:
         '''
@@ -30,83 +31,16 @@ class Session():
 
         #create an IMAP protocol thread if write is enabled
         if "r" in mode:
-            self.mail_IMAP = MailBox(server_email_IMAP,server_port_IMAP)
-            self.mail_IMAP.login(sender_email,sender_password)
+            
+            self.mail_IMAP = MailBox(server_email_IMAP,server_email_IMAP).login(sender_email,sender_password)
             
             
             
-
-    '''def login_SMTP_thread(self,email_server_address,server_port,sender_email,password) -> bool|Exception:
-        
-        command = command_objects.DoNothingCommand()
-        try:
-            with smtplib.SMTP(email_server_address,server_port) as server:
-                server.ehlo()
-                server.starttls()
-                server.login(sender_email,password=password)
-
-                while server:
-                    if self.commands_SMTP:
-                        #find a command that uses SMTP protocol
-                        if self.commands_SMTP[0].protocol == "SMTP":
-
-                            command = self.commands.pop(0)
-                        else:
-                            self.commands.pop(0)
-                    else:
-                        command = command_objects.DoNothingCommand()
-                    match type(command):
-                        
-                        case command_objects.SendMessageCommand:
-                            server.send_message(msg=command.message,from_addr=sender_email,to_addrs=command.reciever)
-                            time.sleep(5)
-                        case command_objects.TerminateCommand:
-                            break
-
-                        case _:
-                            pass
-
-                
-            return True
-        
-        except KeyboardInterrupt:
-            print("disconecting")
-        except Exception as e:
-            print(e)
-            return e
-        
-
-
-
-
-
-
-
-
-        except KeyboardInterrupt as e:
             
-            return False 
+
+            
+    def read_unseen_emails(self,mark_seen = False):
         
-
-
-    def add_command(self,command:command_objects._GeneralCommand) -> bool:
-        "
-        Returns True if command exists and has been added to the stack
-        Returns False if command does not exist
-        "
-        if isinstance(command,command_objects._GeneralCommand):
-            if command.protocol == "SMTP":
-                self.commands_SMTP.append(command)
-            elif command.protocol == "IMAP":
-                self.commands_IMAP.append(command)
-            elif command.protocol is None:
-                self.commands_IMAP.append(command)
-                self.commands_SMTP.append(command)
-            return True
-        return False
-    '''
-    def read_unseen_emails(self,inbox_type:str = "Inbox",mark_seen = False):
-        self.mail_IMAP.folder = inbox_type
         for msg in self.mail_IMAP.fetch(reverse=True,mark_seen=mark_seen,criteria=NOT(seen=True)):
             yield msg
     def send_email(self,message: EmailMessage, reciever: str):

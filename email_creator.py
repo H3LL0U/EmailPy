@@ -8,7 +8,7 @@ def view_html(path:str) -> str:
     with open(path, "r",encoding="UTF-8") as email:
         return email.read()
 
-def email_constructor(to:str,sender_email:str,subject:str,message_content:str, message_content_html:str = "") -> bool:
+def email_constructor(to:str,sender_email:str,subject:str,message_content:str, message_content_html:str = ""):
     #Construct a logged in server using login_SMTP function
     
     message = EmailMessage()

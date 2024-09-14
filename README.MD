@@ -1,1 +1,1 @@
-SMTP and IMAP protocols within a singular Session object!
+This repository is used to send out emails to users from the database
