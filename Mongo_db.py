@@ -1,11 +1,11 @@
 
 from pymongo import MongoClient
+from pymongo import errors
 
 
-
-def get_subscribed_emails(mongo_uri, db_name="Emails", collection_name = "Emails"):
+def get_subscribed_emails(mongo_client:MongoClient, db_name="Emails", collection_name = "Emails"):
     
-    client = MongoClient(mongo_uri)
+    client = mongo_client
     db = client[db_name]
     collection = db[collection_name]
 
@@ -24,9 +24,9 @@ def get_subscribed_emails(mongo_uri, db_name="Emails", collection_name = "Emails
     
     return emails
 
-def remove_newline_from_emails(mongo_uri, db_name = "Emails", collection_name = "Emails"):
+def remove_newline_from_emails(mongo_client:MongoClient, db_name = "Emails", collection_name = "Emails"):
     
-    client = MongoClient(mongo_uri)
+    client = mongo_client
     db = client[db_name]
     collection = db[collection_name]
 
@@ -48,8 +48,8 @@ def remove_newline_from_emails(mongo_uri, db_name = "Emails", collection_name = 
     
     client.close()
 
-def update_subscribed_by_email(mongo_uri,email,new_subscribed_value = False, db_name = "Emails", collection_name = "Emails" ):
-    client = MongoClient(mongo_uri)
+def update_subscribed_by_email(mongo_client:MongoClient,email,new_subscribed_value = False, db_name = "Emails", collection_name = "Emails" ):
+    client = mongo_client
     db = client[db_name]
     collection = db[collection_name]
 
@@ -69,9 +69,9 @@ def update_subscribed_by_email(mongo_uri,email,new_subscribed_value = False, db_
     
     client.close()
 
-def reset_cookies(mongo_uri, db_name = "Emails", collection_name = "Cookies"):
+def reset_cookies(mongo_client:MongoClient, db_name = "Emails", collection_name = "Cookies"):
     
-    client = MongoClient(mongo_uri)
+    client = mongo_client
     
 
     db = client[db_name]
@@ -84,3 +84,47 @@ def reset_cookies(mongo_uri, db_name = "Emails", collection_name = "Cookies"):
     
 
     client.close()
+def add_unique_email(mongo_client:MongoClient, db_name, collection_name, email:str):
+    """
+    Add an email to the MongoDB collection if it is unique.
+    
+    Parameters:
+    - mongo_uri: The URI for the MongoDB connection
+    - db_name: The name of the database
+    - collection_name: The name of the collection
+    - email: The email address to be added
+    
+    Returns:
+    - A message indicating the result of the operation
+    """
+    email = email.strip("\n")
+    try:
+        
+        client = mongo_client
+        
+        
+        db = client[db_name]
+        
+        
+        collection = db[collection_name]
+        
+        
+        existing_email = collection.find_one({"email": email})
+        
+        if existing_email:
+            return "Email already exists in the collection."
+        
+        # Insert the new email
+        result = collection.insert_one({"email": email})
+        
+        if result.inserted_id:
+            return f"Email added successfully with ID: {result.inserted_id}"
+        else:
+            return "Failed to add the email."
+    
+    except errors.PyMongoError as e:
+        return f"An error occurred: {e}"
+    
+    finally:
+        
+        client.close()

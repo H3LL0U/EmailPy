@@ -1,9 +1,7 @@
 import dotenv
 from email_creator import email_constructor, view_html
 from Session import Session
-import mysql.connector
-from mysql.connector import Error, MySQLConnection
-import sqlite3
+
 from email.message import EmailMessage
 #from MYSQL import *
 import pymongo
@@ -23,7 +21,11 @@ SUBJECT=Subject
 
 '''
 
-
+def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session:Session,limit):
+    for idx, reciever in enumerate(get_subscribed_emails(mongo_client)):
+        if idx <limit:
+            
+            email_session.send_email(message=test_email,reciever=reciever)
 if __name__ == "__main__":
     
     #initialising variables
@@ -36,7 +38,7 @@ if __name__ == "__main__":
                     sender_password=config["PASSWORD"],
                     server_port_IMAP= 993,
                     server_email_IMAP="imap-mail.outlook.com", #imap-mail.outlook.com
-                    mode="")
+                    mode="w")
     
     print("Session started")   
     test_email =email_constructor(
@@ -46,28 +48,11 @@ if __name__ == "__main__":
         view_html(config["EMAIL_CONTENTS_PATH_TXT"]), #message txt
         view_html(config["EMAIL_CONTENTS_PATH_HTML"]) #html view
         )
-    '''
-    database_connection = connect_to_database_MYSQL(
-        database=config["DATABASE_NAME"],
-        host=config["DATABASE_HOST"],
-        user = config["DATABASE_USER"],
-        password=config["DATABASE_PASSWORD"],
-        port=config["DATABASE_PORT"]
-    )
-    '''
-    
-    
-    #database = database_connection["Emails"]
+    database_connection = MongoClient(config["MONGO_DB_LINK"])
 
-    #reset_cookies(config["MONGO_DB_LINK"])
+    #send_emails_to_users(database_connection,10)
 
-
-    
-    #all_subscribed_emails = get_all_subscribed_emails(database_connection)
-    #session.send_email(test_email, config["RECIEVER_EMAIL"])
-    
-    #send_messages_to_users(all_subscribed_emails,session=session,msg=test_email,limit=400)
-    #send_query(database_connection,"TRUNCATE TABLE visited;")
-    #database_connection.close()
+    #cleanup
     session.terminate()
+    database_connection.close()
         

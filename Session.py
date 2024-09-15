@@ -22,14 +22,14 @@ class Session():
 
         
 
-        #create an SMTP protocol thread if write is enabled
+        
         if "w" in mode:
             self.mail_SMTP = smtplib.SMTP(server_email_SMTP,server_port_SMTP)
             self.mail_SMTP.ehlo()
             self.mail_SMTP.starttls()
             self.mail_SMTP.login(sender_email,password=sender_password)
 
-        #create an IMAP protocol thread if write is enabled
+        
         if "r" in mode:
             
             self.mail_IMAP = MailBox(server_email_IMAP,server_email_IMAP).login(sender_email,sender_password)
