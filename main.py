@@ -5,7 +5,9 @@ import mysql.connector
 from mysql.connector import Error, MySQLConnection
 import sqlite3
 from email.message import EmailMessage
-from MYSQL import *
+#from MYSQL import *
+import pymongo
+from Mongo_db import *
 '''
 Example for the config:
 EMAIL=sender@outlook.com
@@ -44,21 +46,28 @@ if __name__ == "__main__":
         view_html(config["EMAIL_CONTENTS_PATH_TXT"]), #message txt
         view_html(config["EMAIL_CONTENTS_PATH_HTML"]) #html view
         )
-    
-    database_connection = connect_to_database(
+    '''
+    database_connection = connect_to_database_MYSQL(
         database=config["DATABASE_NAME"],
         host=config["DATABASE_HOST"],
         user = config["DATABASE_USER"],
         password=config["DATABASE_PASSWORD"],
         port=config["DATABASE_PORT"]
     )
+    '''
+    
+    
+    #database = database_connection["Emails"]
+
+    #reset_cookies(config["MONGO_DB_LINK"])
+
 
     
-    all_subscribed_emails = get_all_subscribed_emails(database_connection)
+    #all_subscribed_emails = get_all_subscribed_emails(database_connection)
     #session.send_email(test_email, config["RECIEVER_EMAIL"])
     
     #send_messages_to_users(all_subscribed_emails,session=session,msg=test_email,limit=400)
     #send_query(database_connection,"TRUNCATE TABLE visited;")
-    database_connection.close()
+    #database_connection.close()
     session.terminate()
         
