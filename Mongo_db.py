@@ -19,7 +19,6 @@ def get_subscribed_emails(mongo_client:MongoClient, db_name="Emails", collection
     emails = [doc["email"] for doc in documents]
 
     
-    client.close()
 
     
     return emails
@@ -67,7 +66,6 @@ def update_subscribed_by_email(mongo_client:MongoClient,email,new_subscribed_val
         print(f"Document with email {email} was successfully updated to subscribed={new_subscribed_value}.")
 
     
-    client.close()
 
 def reset_cookies(mongo_client:MongoClient, db_name = "Emails", collection_name = "Cookies"):
     

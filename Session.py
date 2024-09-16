@@ -32,7 +32,7 @@ class Session():
         
         if "r" in mode:
             
-            self.mail_IMAP = MailBox(server_email_IMAP,server_email_IMAP).login(sender_email,sender_password)
+            self.mail_IMAP = MailBox(server_email_IMAP,server_port_IMAP).login(sender_email,sender_password)
             
             
             
@@ -41,6 +41,9 @@ class Session():
             
     def read_unseen_emails(self,mark_seen = False):
         
+        for msg in self.mail_IMAP.fetch(reverse=True,mark_seen=mark_seen,criteria=NOT(seen=True)):
+            yield msg
+        self.mail_IMAP.folder.set("Spam")
         for msg in self.mail_IMAP.fetch(reverse=True,mark_seen=mark_seen,criteria=NOT(seen=True)):
             yield msg
     def send_email(self,message: EmailMessage, reciever: str):
