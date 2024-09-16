@@ -28,7 +28,7 @@ def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session:Session,
             email_session.send_email(message=test_email,reciever=reciever)
 
 def remove_users_who_unsubscribed(session:Session,database_connection:MongoClient):
-    unseen_emails = session.read_unseen_emails()
+    unseen_emails = session.read_unseen_emails(mark_seen=True)
     for email in unseen_emails:
 
         _from,subject,text, = email.from_,email.subject,email.text
