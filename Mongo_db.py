@@ -129,3 +129,27 @@ def get_ammount_documents(mongo_client:MongoClient,db_name = "Emails",collection
     collection = db[collection]
 
     return collection.count_documents({})
+
+def delete_document_by_email(connection:MongoClient,email:str, db_name = "Emails", collection_name = "Emails"):
+    """
+    Remove a document from MongoDB by its email value.
+    
+    :param connection: The MongoClient connection
+    :param db_name: The name of the database
+    :param collection_name: The name of the collection
+    :param email: The email value to search for and remove
+    :return: The result of the delete operation
+    """
+    
+    db = connection[db_name]
+    collection = db[collection_name]
+    
+    # Delete one document that matches the email
+    result = collection.delete_one({"email": email})
+    
+    if result.deleted_count > 0:
+        print(f"Document with email {email} deleted successfully.")
+    else:
+        print(f"No document found with email {email}.")
+    
+    return result

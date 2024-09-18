@@ -6,11 +6,25 @@ from email.message import EmailMessage
 from imap_tools import MailBox, NOT
 import imaplib
 class Session():
-    def __init__(self,sender_email:str,sender_password:str, mode:str,server_email_SMTP:str|None = None,server_port_SMTP:str|None = None,server_email_IMAP:str=None,server_port_IMAP:str|None = None) -> None:
+    def __init__(self,sender_email:str,sender_password:str, mode:str,server_email_SMTP:str|None = None,server_port_SMTP:int|None = 587,server_email_IMAP:str|None = None,server_port_IMAP:str|None = None) -> None:
         '''
+        This is a Session for IMAP and SMTP protocols it combines both of them to create a universal session
+
+        sender_email: A email that you are logging into
+        
+        sender_password: A password for your email 
+
+        mode: Solidifies which protocols you are going to be using  
+
         Set mode to "r" if you are only using IMAP protocol (read)
         Set mode to "w" if you are only using SMTP  prtotcol (write)
         Set mode to "rw" or "wr" if you are using both protocols (read write)
+
+        server_email_SMTP: An SMTP server for your email provider
+        server_email_IMAP: A IMAP servr for your email provider
+
+        server_port_SMTP:A port for the SMTP server default 587
+        server_port_IMAP:A port for IMAP server defaults to 993
         '''
         self.alive = True
         self.sender_email = sender_email
@@ -55,6 +69,35 @@ class Session():
         for msg in self.mail_IMAP.fetch(reverse=True,mark_seen=mark_seen,criteria=NOT(seen=True)):
             yield msg
         self.mail_IMAP.folder.set("Inbox")
+    def read_all_emails_from_user(self,user_email,mark_seen,check_spam = True, criteria =NOT(seen=True) ):
+        for msg in self.mail_IMAP.fetch(reverse=True,mark_seen=mark_seen,criteria=criteria):
+            if msg.from_ == user_email:
+            
+                yield msg
+        self.mail_IMAP.folder.set("Spam")
+        if check_spam == True:
+            for msg in self.mail_IMAP.fetch(reverse=True,mark_seen=mark_seen,criteria = criteria):
+                if msg.from_ == user_email:
+                
+                    yield msg
+            
+        self.mail_IMAP.folder.set("Inbox")
+        
+    def find_first_mentioned_email_in_emails(self,user_email,mark_seen=False,criteria = NOT(seen=True)):
+        
+        '''
+        yields the first mention of an email from some user's emails
+        '''
+        
+        for msg in self.read_all_emails_from_user(user_email=user_email,mark_seen=mark_seen,criteria=criteria):
+            text = msg.text
+            words = text.split(" ")
+            for word in words:
+                if "@" in word:
+                    yield word.strip().strip(":")
+                    break
+
+
     def send_email(self,message: EmailMessage, reciever: str):
         '''
         message should be of type email.message.EmailMessage
@@ -89,7 +132,8 @@ class Session():
             self.mail_SMTP = None
             raise Exception("Connection to SMTP failed" +str(e))
             #print("Connection to SMTP failed" , e)
-        
+
+
     def reconnect_if_needed(self):
         '''
         returns True if connection established
