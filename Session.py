@@ -14,7 +14,18 @@ class Session():
         '''
         self.alive = True
         self.sender_email = sender_email
-        
+        self.sender_password = sender_password
+        #imap params
+        self.server_email_IMAP = server_email_IMAP
+        self.server_port_IMAP = server_port_IMAP
+        #smtp params
+        self.server_port_SMTP = server_port_SMTP
+        self.server_email_SMTP = server_email_SMTP
+
+
+
+
+
         self.mail_SMTP = None
         self.mail_IMAP = None
 
@@ -24,15 +35,12 @@ class Session():
 
         
         if "w" in mode:
-            self.mail_SMTP = smtplib.SMTP(server_email_SMTP,server_port_SMTP)
-            self.mail_SMTP.ehlo()
-            self.mail_SMTP.starttls()
-            self.mail_SMTP.login(sender_email,password=sender_password)
+            self.connect_SMTP()
 
         
         if "r" in mode:
             
-            self.mail_IMAP = MailBox(server_email_IMAP,server_port_IMAP).login(sender_email,sender_password)
+            self.connect_IMAP()
             
             
             
@@ -46,13 +54,15 @@ class Session():
         self.mail_IMAP.folder.set("Spam")
         for msg in self.mail_IMAP.fetch(reverse=True,mark_seen=mark_seen,criteria=NOT(seen=True)):
             yield msg
+        self.mail_IMAP.folder.set("Inbox")
     def send_email(self,message: EmailMessage, reciever: str):
         '''
         message should be of type email.message.EmailMessage
         '''
+        self.reconnect_if_needed()
         #if not(self.mail_SMTP is None):
         
-        return self.mail_SMTP.send_message(msg=message,from_addr=self.sender_email,to_addrs=reciever)
+        return self.mail_SMTP.send_message(msg=message,from_addr=self.sender_email,to_addrs=reciever,)
     def terminate(self) -> None:
         '''
         Terminates the current session
@@ -67,4 +77,36 @@ class Session():
         self.alive = False
     def is_alive(self) -> bool:
         return self.alive
-
+    def connect_IMAP(self):
+        self.mail_IMAP = MailBox(self.server_email_IMAP,self.server_port_IMAP,).login(self.sender_email,self.sender_password)
+    def connect_SMTP(self):
+        try:
+            self.mail_SMTP = smtplib.SMTP(self.server_email_SMTP,self.server_port_SMTP)
+            self.mail_SMTP.ehlo()
+            self.mail_SMTP.starttls()
+            self.mail_SMTP.login(self.sender_email,password=self.sender_password)
+        except Exception as e:
+            self.mail_SMTP = None
+            raise Exception("Connection to SMTP failed" +str(e))
+            #print("Connection to SMTP failed" , e)
+        
+    def reconnect_if_needed(self):
+        '''
+        returns True if connection established
+        else returns False
+        '''
+        try:
+            
+            status = self.mail_SMTP.noop()
+            
+            
+            if status[0] == 250:
+                return True
+            else:
+                self.connect_SMTP()
+                return True
+        except KeyboardInterrupt:
+            self.terminate()
+        except Exception:
+            self.mail_SMTP = None
+            self.connect_SMTP()

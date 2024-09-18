@@ -1,1 +1,16 @@
+build==1.2.2
+certifi==2024.8.30
+charset-normalizer==3.3.2
+colorama==0.4.6
+disposable-email-domains==0.0.105
+dnspython==2.6.1
+filelock==3.16.0
+idna==3.10
+imap-tools==1.7.2
+mysql-connector-python==9.0.0
+packaging==24.1
+pymongo==4.8.0
+pyproject_hooks==1.1.0
 python-dotenv==1.0.1
+urllib3==2.2.3
+validate-email-wt==1.4.6

@@ -21,7 +21,16 @@ def email_constructor(to:str,sender_email:str,subject:str,message_content:str, m
     message.add_alternative(message_content_html,subtype = "html",)
 
     return message
-
+def email_constructor_preconstructed(config):
+        
+        preconstructed_email = lambda reciever: email_constructor(
+        reciever, #reciever
+        config["EMAIL"], #sender
+        config["SUBJECT"], #subject
+        view_html(config["EMAIL_CONTENTS_PATH_TXT"]), #message txt
+        view_html(config["EMAIL_CONTENTS_PATH_HTML"]) #html view
+        )
+        return preconstructed_email
     
 
 

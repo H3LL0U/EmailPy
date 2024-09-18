@@ -82,7 +82,7 @@ def reset_cookies(mongo_client:MongoClient, db_name = "Emails", collection_name 
     
 
     client.close()
-def add_unique_email(mongo_client:MongoClient, db_name, collection_name, email:str):
+def add_unique_email(mongo_client:MongoClient, email:str, db_name = "Emails", collection_name = "Emails"):
     """
     Add an email to the MongoDB collection if it is unique.
     
@@ -96,6 +96,7 @@ def add_unique_email(mongo_client:MongoClient, db_name, collection_name, email:s
     - A message indicating the result of the operation
     """
     email = email.strip("\n")
+    
     try:
         
         client = mongo_client
@@ -122,7 +123,9 @@ def add_unique_email(mongo_client:MongoClient, db_name, collection_name, email:s
     
     except errors.PyMongoError as e:
         return f"An error occurred: {e}"
-    
-    finally:
-        
-        client.close()
+
+def get_ammount_documents(mongo_client:MongoClient,db_name = "Emails",collection="Emails"):
+    db = mongo_client[db_name]
+    collection = db[collection]
+
+    return collection.count_documents({})
