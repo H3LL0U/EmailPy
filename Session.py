@@ -69,6 +69,14 @@ class Session():
         for msg in self.mail_IMAP.fetch(reverse=True,mark_seen=mark_seen,criteria=NOT(seen=True)):
             yield msg
         self.mail_IMAP.folder.set("Inbox")
+    def read_all_emails(self,mark_seen = False):
+                
+        for msg in self.mail_IMAP.fetch(reverse=True,mark_seen=mark_seen):
+            yield msg
+        self.mail_IMAP.folder.set("Spam")
+        for msg in self.mail_IMAP.fetch(reverse=True,mark_seen=mark_seen):
+            yield msg
+        self.mail_IMAP.folder.set("Inbox")
     def read_all_emails_from_user(self,user_email,mark_seen,check_spam = True, criteria =NOT(seen=True) ):
         for msg in self.mail_IMAP.fetch(reverse=True,mark_seen=mark_seen,criteria=criteria):
             if msg.from_ == user_email:

@@ -21,11 +21,11 @@ EMAIL_CONTENTS_PATH_HTML=./message.html
 SUBJECT=Subject
 
 '''
-def clear_inactive_emails(database_connection:MongoClient,reader_session:Session):
+def clear_inactive_emails(database_connection:MongoClient,reader_session:Session,mark_seen = True):
     '''
     Removes all emails that are inactive by checking the reply from mailer-daemon@gmx.net and removing the mentioned email
     '''
-    for inactive_email in reader_session.find_first_mentioned_email_in_emails("mailer-daemon@gmx.net",criteria="ALL"):
+    for inactive_email in reader_session.find_first_mentioned_email_in_emails("mailer-daemon@gmx.net",mark_seen=mark_seen):
         delete_document_by_email(connection=database_connection,email=inactive_email)
 def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:Session,email_session:Session,limit:int,msg_func,start_from=0,timeout_between_emails_seconds=0):
     '''
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     #print(get_ammount_documents(database_connection))
     #time.sleep(600)
 
-        
+    #print(len(list(reader_session.read_all_emails())))
 
     #send_emails_to_users(database_connection,email_session=session, email_session_reader=reader_session,limit=9999,start_from=130, msg_func = email_constructor_preconstructed(config=config), timeout_between_emails_seconds=600)
     #session.send_email(email_constructor_preconstructed(config)("3007651@leerling.o2g2.nl"),"3007651@leerling.o2g2.nl")
