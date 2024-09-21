@@ -108,7 +108,7 @@ if __name__ == "__main__":
     database_connection = MongoClient(config["MONGO_DB_LINK"])
 
     #-----
-
+    
     #-----
 
     database_connection.close()
