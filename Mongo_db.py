@@ -13,7 +13,7 @@ def get_subscribed_emails(mongo_client:MongoClient, db_name="Emails", collection
     collection = db[collection_name]
 
     # Get both encrypted and unencrypted emails
-    query = {"subscribed":True,"exists":True}
+    query = {"subscribed":True,"exists":True,"encrypted":False}
 
     
     documents = collection.find(query, {"_id": 0, "email": 1})
@@ -29,7 +29,7 @@ def get_subscribed_emails(mongo_client:MongoClient, db_name="Emails", collection
 
     
     return emails
-def get_emails(mongo_client:MongoClient, db_name="Emails", collection_name = "Emails"):
+def get_emails(mongo_client:MongoClient, db_name="Emails", collection_name = "Emails",auto_decrypt = True, query=None):
     '''
     returns a tupple with (id, decrypted_emails)
     '''
@@ -38,12 +38,13 @@ def get_emails(mongo_client:MongoClient, db_name="Emails", collection_name = "Em
     collection = db[collection_name]
 
     # Get unencrypted
-    query = {"encrypted":False}
+    if query is None:
+        query = {"encrypted":False}
 
-    
+        
     documents = collection.find(query, {"_id": 1, "email": 1})
 
-    
+        
     emails = [(doc["_id"],doc["email"]) for doc in documents]
     
     #get encrypted
@@ -51,8 +52,10 @@ def get_emails(mongo_client:MongoClient, db_name="Emails", collection_name = "Em
     
     documents = collection.find(query, {"_id": 1, "email": 1})
     for doc in documents:
-        emails.append((doc["_id"],decrypt_value(doc["email"])))
-    
+        if auto_decrypt:
+            emails.append((doc["_id"],decrypt_value(doc["email"])))
+        else:
+            emails.append((doc["_id"],doc["email"]))
 
     
     return emails
@@ -147,7 +150,7 @@ def get_id_of_an_email(mongo_client:MongoClient,email:str,db_name:str = "Emails"
     returns: objectID of an email from the database by email name
     If no email returns False
     '''
-    all_emails = get_emails(mongo_client,db_name=db_name,collection_name=collection_name)
+    all_emails = get_emails(mongo_client,db_name=db_name,collection_name=collection_name,)
     
     
     email_dict = {email[1]: email[0] for email in all_emails}
@@ -179,7 +182,7 @@ def add_unique_email(mongo_client:MongoClient, email:str, db_name = "Emails", co
         collection = db[collection_name]
         
         
-        all_emails = get_emails(client)
+        all_emails = get_emails(client,db_name=db_name,collection_name=collection_name)
         
         try:
             
@@ -268,7 +271,7 @@ def add_property_to_documents(connection:MongoClient,property_name:str,property_
     
     update_query = {"$set": {property_name: property_value}}
 
-
+    
     result = collection.update_many(filter_query, update_query)
 
     if result.modified_count > 0:
@@ -333,3 +336,20 @@ def decrypt_values_in_db(connection:MongoClient,property_name:str = "email",db_n
         print(f"Decrypted and updated document with _id: {doc['_id']} to {encrypted_value}")
         email_num+=1
     return email_num
+
+def get_encrypted_version(connection:MongoClient,email:str,db_name = "Emails", collection_name = "Emails"):
+    '''
+    gets the encrypted version from the database if it exists
+    '''
+    client = connection
+
+    
+    db = client[db_name]
+    collection = db[collection_name]
+
+    email_id = get_id_of_an_email(connection,email,db_name=db_name,collection_name=collection_name)
+    
+    email = get_emails(client,db_name=db_name,collection_name=collection_name,auto_decrypt=False,query={"encrypted":False,"_id":email_id})
+    if email:
+        return email[0][1]
+    return None

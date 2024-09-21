@@ -1,5 +1,5 @@
 import dotenv
-from email_creator import email_constructor, view_html ,email_constructor_preconstructed
+from email_creator import *
 from Session import Session
 
 from email.message import EmailMessage
@@ -27,8 +27,9 @@ def clear_inactive_emails(database_connection:MongoClient,reader_session:Session
     '''
     for inactive_email in reader_session.find_first_mentioned_email_in_emails("mailer-daemon@gmx.net",mark_seen=mark_seen):
         #delete_document_by_email(connection=database_connection,email=inactive_email)
-        add_property_to_documents(database_connection,"exists",0,filter_query={"email":inactive_email})
-def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:Session,email_session:Session,limit:int,msg_func,start_from=0,timeout_between_emails_seconds=0):
+        add_property_to_documents(database_connection,"exists",False,filter_query={"email":inactive_email})
+
+def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:Session,email_session:Session,limit:int,msg:EmailMessage,start_from=0,timeout_between_emails_seconds=0):
     '''
     Sends the messages to users from the database
 
@@ -50,11 +51,16 @@ def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:S
     email_session_reader.terminate()
     emails_to_send_to = get_subscribed_emails(mongo_client)[start_from:]
     
+    
     limit-=start_from
     for idx, reciever in enumerate(emails_to_send_to):
         if idx <limit:
             
-            msg = msg_func(reciever)
+            del msg["To"]
+            msg["To"] = reciever
+            encrypted_email = get_encrypted_version(mongo_client,reciever)
+            replace_text_of_the_message(msg,"https://phishing-awareness-website.onrender.com/",f"https://phishing-awareness-website.onrender.com/{encrypted_email}")
+                
             print("errors:" , email_session.send_email(message=msg,reciever=reciever))
             print(f"email sent to: {reciever}")
             time.sleep(timeout_between_emails_seconds)
@@ -93,6 +99,14 @@ if __name__ == "__main__":
     dotenv.load_dotenv()
     config=dotenv.dotenv_values()
     
+    test_message = email_constructor(
+        None, #Will be replaced inside of the function based on the recieving email
+        config["EMAIL"],
+        config["SUBJECT"],
+        view_html(config["EMAIL_CONTENTS_PATH_TXT"]),
+        view_html(config["EMAIL_CONTENTS_PATH_HTML"])
+    )
+
     session = Session(server_email_SMTP=config["SERVER_EMAIL"],
                     server_port_SMTP=config["PORT"],
                     sender_email=config["EMAIL"],
@@ -108,6 +122,8 @@ if __name__ == "__main__":
     database_connection = MongoClient(config["MONGO_DB_LINK"])
 
     #-----
+    
+    #send_emails_to_users(database_connection,reader_session,session,999,test_message)
     
     #-----
 

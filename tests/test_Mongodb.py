@@ -1,6 +1,6 @@
 
 import dotenv
-from email_creator import email_constructor, view_html ,email_constructor_preconstructed
+from email_creator import email_constructor, view_html 
 from Session import Session
 
 from email.message import EmailMessage
@@ -46,7 +46,41 @@ class TestEmailFunctions(unittest.TestCase):
             {"email": self.encrypted_email, "subscribed": True, "encrypted": True, "exists":True},
         ])
 
-    
+    def test_add_property_to_documents(self):
+        # Test adding a new property to documents
+        modified_count = add_property_to_documents(
+            connection=self.client,
+            property_name="new_property",
+            property_value=True,
+            db_name=self.db_name,
+            collection_name=self.collection_name,
+            filter_query={"subscribed": True}  
+        )
+        
+        
+        self.assertEqual(modified_count, 2)
+
+        modified_docs = list(self.collection.find({"new_property": True}))
+        self.assertEqual(len(modified_docs), 2)  
+        
+        # Verify the specific emails modified
+        modified_emails = [doc["email"] for doc in modified_docs]
+        self.assertIn("test1@gmail.com", modified_emails)
+        self.assertIn(self.encrypted_email, modified_emails)
+        #check other query
+        modified_count = add_property_to_documents(
+            connection=self.client,
+            property_name="new_property1",
+            property_value=True,
+            db_name=self.db_name,
+            collection_name=self.collection_name,
+            
+        )
+        self.assertEqual(modified_count,3)
+                
+        modified_emails = [doc["email"] for doc in modified_docs]
+        self.assertIn("test1@gmail.com", modified_emails)
+        self.assertIn(self.encrypted_email, modified_emails)
     def test_get_subscribed_emails(self):
 
         emails = get_subscribed_emails(self.client, db_name=self.db_name, collection_name=self.collection_name)
@@ -79,9 +113,10 @@ class TestEmailFunctions(unittest.TestCase):
         self.assertTrue("test1@gmail.com" in subscribed_emails)
 
     def test_get_id_of_an_email(self):
-        obj_id = get_id_of_an_email(self.client, "test1@gmail.com",db_name=self.db_name,collection_name=self.collection_name)
+        obj_id = get_id_of_an_email(self.client, "test1@gmail.com",db_name=self.db_name,collection_name=self.collection_name,)
         self.assertIsNotNone(obj_id)
-
+        obj_id = get_id_of_an_email(self.client, "test2@gmail.com",db_name=self.db_name,collection_name=self.collection_name,)
+        self.assertIsNotNone(obj_id)
     def test_add_unique_email(self):
         new_email = "new_test@gmail.com"
         obj_id = add_unique_email(self.client, new_email, db_name=self.db_name, collection_name=self.collection_name, encrypt=False)
@@ -89,6 +124,8 @@ class TestEmailFunctions(unittest.TestCase):
         doc = self.collection.find_one({"_id": obj_id})
         self.assertEqual(doc["email"], new_email)
 
+        result = add_unique_email(self.client, new_email, db_name=self.db_name, collection_name=self.collection_name, encrypt=False)
+        self.assertIsNone(result)
     def test_delete_document_by_email(self):
         delete_result = delete_document_by_email(self.client, "test1@gmail.com", db_name=self.db_name, collection_name=self.collection_name)
         self.assertIsNotNone(delete_result)
@@ -97,12 +134,19 @@ class TestEmailFunctions(unittest.TestCase):
     def test_encrypt_values_in_db(self):
         email_count = encrypt_values_in_db(self.client, property_name="email", db_name=self.db_name, collection_name=self.collection_name, filter_query={"encrypted": False})
         self.assertGreater(email_count, 0)  
-
+        
     def test_decrypt_values_in_db(self):
         encrypt_values_in_db(self.client, property_name="email", db_name=self.db_name, collection_name=self.collection_name, filter_query={"encrypted": False})
         decrypted_count = decrypt_values_in_db(self.client, property_name="email", db_name=self.db_name, collection_name=self.collection_name, filter_query={"encrypted": True})
-        self.assertGreater(decrypted_count, 0)  
+        self.assertGreater(decrypted_count, 0)
 
+        self.assertIsNotNone(self.collection.find_one({"email":"test3@gmail.com"}))
+    
+    def test_get_encrypted_version(self):
+        encrypted = get_encrypted_version(self.client, "test3@gmail.com", db_name=self.db_name, collection_name=self.collection_name)
+        self.assertEqual(encrypted,self.encrypted_email)
+        self.assertIsNotNone(self.collection.find_one({"email":self.encrypted_email}))
+    
 if __name__ == "__main__":
     unittest.main()
 

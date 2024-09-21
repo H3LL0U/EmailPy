@@ -16,22 +16,37 @@ def email_constructor(to:str,sender_email:str,subject:str,message_content:str, m
     message["From"] = sender_email
     message["To"] = to
     message["BCC"] = sender_email
-
+    
     message.set_content(message_content)
     message.add_alternative(message_content_html,subtype = "html",)
+        
 
     return message
-def email_constructor_preconstructed(config):
+from email.message import EmailMessage
+
+
+def replace_text_of_the_message(msg:EmailMessage,old_str:str,new_str:str):
+    if msg.is_multipart():
         
-        preconstructed_email = lambda reciever: email_constructor(
-        reciever, #reciever
-        config["EMAIL"], #sender
-        config["SUBJECT"], #subject
-        view_html(config["EMAIL_CONTENTS_PATH_TXT"]), #message txt
-        view_html(config["EMAIL_CONTENTS_PATH_HTML"]) #html view
-        )
-        return preconstructed_email
-    
+        for part in msg.iter_parts():
+            content_type = part.get_content_type()  
+            
+            if content_type == 'text/plain' or content_type == 'text/html':
+                
+                original_content = part.get_payload(decode=True).decode(part.get_content_charset())
+
+                
+                updated_content = original_content.replace(old_str, new_str)
+
+                
+                part.set_payload(updated_content.encode(part.get_content_charset()))
+    else:
+        
+        original_content = msg.get_content()
+        updated_content = original_content.replace(old_str, new_str)
+        msg.set_content(updated_content)
+        return msg
+
 
 
 
