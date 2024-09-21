@@ -26,7 +26,8 @@ def clear_inactive_emails(database_connection:MongoClient,reader_session:Session
     Removes all emails that are inactive by checking the reply from mailer-daemon@gmx.net and removing the mentioned email
     '''
     for inactive_email in reader_session.find_first_mentioned_email_in_emails("mailer-daemon@gmx.net",mark_seen=mark_seen):
-        delete_document_by_email(connection=database_connection,email=inactive_email)
+        #delete_document_by_email(connection=database_connection,email=inactive_email)
+        add_property_to_documents(database_connection,"exists",0,filter_query={"email":inactive_email})
 def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:Session,email_session:Session,limit:int,msg_func,start_from=0,timeout_between_emails_seconds=0):
     '''
     Sends the messages to users from the database
@@ -48,6 +49,7 @@ def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:S
     remove_users_who_unsubscribed(database_connection=mongo_client,session=email_session_reader)
     email_session_reader.terminate()
     emails_to_send_to = get_subscribed_emails(mongo_client)[start_from:]
+    
     limit-=start_from
     for idx, reciever in enumerate(emails_to_send_to):
         if idx <limit:
@@ -73,7 +75,7 @@ def remove_users_who_unsubscribed(session:Session,database_connection:MongoClien
         subject = subject.lower()
         if "unsubscribe" in subject or "unsubscribe" in text:
             _from = _from[:_from.rfind("@")] + "@leerling.o2g2.nl"
-            update_subscribed_by_email(database_connection,_from)
+            update_subscribed_by_email(database_connection, encrypt_value(_from))
             print(f"unsubscribed user: {_from}")
 def from_txt_to_db(path_to_txt_file,database_connection,should_have_second_and_top_level_domain=""):
     '''
@@ -105,21 +107,10 @@ if __name__ == "__main__":
     print("Sessions started")   
     database_connection = MongoClient(config["MONGO_DB_LINK"])
 
-    #send_emails_to_users(database_connection,10)
-    
-    #clear_inactive_emails(database_connection=database_connection,reader_session=reader_session)
+    #-----
 
-    #from_txt_to_db(path_to_txt_file="leerling_emails_db\leerling_emails4.txt",database_connection=database_connection,should_have_second_and_top_level_domain="leerling.o2g2.nl")
-    #print(get_ammount_documents(database_connection))
-    #time.sleep(600)
+    #-----
 
-    #print(len(list(reader_session.read_all_emails())))
-
-    #send_emails_to_users(database_connection,email_session=session, email_session_reader=reader_session,limit=9999,start_from=130, msg_func = email_constructor_preconstructed(config=config), timeout_between_emails_seconds=600)
-    #session.send_email(email_constructor_preconstructed(config)("3007651@leerling.o2g2.nl"),"3007651@leerling.o2g2.nl")
-    #cleanup
-
-    #session.terminate()
     database_connection.close()
     reader_session.terminate()
         
