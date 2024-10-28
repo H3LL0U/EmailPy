@@ -85,7 +85,7 @@ def remove_users_who_unsubscribed(session:Session,database_connection:MongoClien
             print(f"unsubscribed user: {_from}")
 def from_txt_to_db(path_to_txt_file,database_connection,should_have_second_and_top_level_domain=""):
     '''
-    Gets emails stored on a txt line and ads them line by line to the database if they were not yet there
+    Gets emails stored on a txt line and adds them line by line to the database if they were not yet there
     '''
     with open(path_to_txt_file,"r") as txt:
         for email in txt.readlines():
@@ -118,12 +118,12 @@ if __name__ == "__main__":
                     server_port_IMAP= 993,
                     server_email_IMAP="imap.gmx.com", #imap-mail.outlook.com
                     mode="r")
-    print("Sessions started")   
+    log("Sessions started")   
     database_connection = MongoClient(config["MONGO_DB_LINK"])
 
     #-----
     
-    #send_emails_to_users(database_connection,reader_session,session,999,test_message)
+
     
     #-----
 

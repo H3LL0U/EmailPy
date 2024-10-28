@@ -1,4 +1,7 @@
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 import dotenv
 from email_creator import email_constructor, view_html 
 from Session import Session

@@ -6,6 +6,13 @@ from cryptography_db import *
 DEFAULT_VALUES = {"subscribed":True,
                   "encrypted":False,
                   "exists":True}
+
+ENABLE_LOGGING =  True
+
+def log(message):
+    if ENABLE_LOGGING:
+        print(message)
+
 def get_subscribed_emails(mongo_client:MongoClient, db_name="Emails", collection_name = "Emails"):
     
     client = mongo_client
@@ -107,40 +114,28 @@ def update_subscribed_by_email(mongo_client:MongoClient,email,new_subscribed_val
         
         result = collection.update_one({"_id":email_id},update)
         if result.matched_count == 0:
-            print(f"No document found with email: {email}")
+            log(f"No document found with email: {email}")
             return None
 
         elif result.modified_count == 0:
-            print(f"Encrypted Document with email {email} was already set to subscribed={new_subscribed_value}.")
+            log(f"Encrypted Document with email {email} was already set to subscribed={new_subscribed_value}.")
             return False
         else:
-            print(f"Encrypted Document with email {email} was successfully updated to subscribed={new_subscribed_value}.")
+            log(f"Encrypted Document with email {email} was successfully updated to subscribed={new_subscribed_value}.")
             return True
                 
 
 
 
     elif result.modified_count == 0:
-        print(f"Document with email {email} was already set to subscribed={new_subscribed_value}.")
+        log(f"Document with email {email} was already set to subscribed={new_subscribed_value}.")
         return False
     else:
-        print(f"Document with email {email} was successfully updated to subscribed={new_subscribed_value}.")
+        log(f"Document with email {email} was successfully updated to subscribed={new_subscribed_value}.")
         return True
 
     
 
-def reset_cookies(mongo_client:MongoClient, db_name = "Emails", collection_name = "Cookies"):
-    
-    client = mongo_client
-    
-
-    db = client[db_name]
-    
-
-    collection = db[collection_name]
-    
-
-    collection.delete_many({})
     
 
     
@@ -229,7 +224,7 @@ def delete_document_by_email(connection:MongoClient,email:str, db_name = "Emails
     :param db_name: The name of the database
     :param collection_name: The name of the collection
     :param email: The email value to search for and remove
-    :return: The result of the delete operation
+    :return: The result of the delete operation 
     """
     
     db = connection[db_name]
@@ -239,7 +234,7 @@ def delete_document_by_email(connection:MongoClient,email:str, db_name = "Emails
 
     id_email = get_id_of_an_email(connection,email=email,collection_name=collection_name,db_name=db_name)
     if id_email is None:
-        print("Email not found")
+        log("Email not found")
         return None
 
 
@@ -247,9 +242,9 @@ def delete_document_by_email(connection:MongoClient,email:str, db_name = "Emails
     result = collection.delete_one({"_id": id_email})
     
     if result.deleted_count > 0:
-        print(f"Document with email {email} deleted successfully.")
+        log(f"Document with email {email} deleted successfully.")
     else:
-        print(f"No document found with email {email}.")
+        log(f"No document found with email {email}.")
     
     return result
 
@@ -275,9 +270,9 @@ def add_property_to_documents(connection:MongoClient,property_name:str,property_
     result = collection.update_many(filter_query, update_query)
 
     if result.modified_count > 0:
-        print(f"Successfully updated the document: {result.modified_count} document(s) modified.")
+        log(f"Successfully updated the document: {result.modified_count} document(s) modified.")
     else:
-        print("No document was updated, or the property already exists with the given value.")
+        log("No document was updated, or the property already exists with the given value.")
     return result.modified_count
 
 def encrypt_values_in_db(connection:MongoClient,property_name:str = "email",db_name = "Emails", collection_name = "Emails",filter_query={"encrypted":False}):
@@ -307,7 +302,7 @@ def encrypt_values_in_db(connection:MongoClient,property_name:str = "email",db_n
             
         )
         email_num+=1
-        print(f"Encrypted and updated document with _id: {doc['_id']} to {encrypted_value}")
+        log(f"Encrypted and updated document with _id: {doc['_id']} to {encrypted_value}")
     return email_num
 def decrypt_values_in_db(connection:MongoClient,property_name:str = "email",db_name = "Emails", collection_name = "Emails",filter_query={"encrypted":True}):
     '''
@@ -333,7 +328,7 @@ def decrypt_values_in_db(connection:MongoClient,property_name:str = "email",db_n
         collection.update_one(
             {"_id": doc["_id"]},  
             {"$set": {property_name: encrypted_value, "encrypted": False}})
-        print(f"Decrypted and updated document with _id: {doc['_id']} to {encrypted_value}")
+        log(f"Decrypted and updated document with _id: {doc['_id']} to {encrypted_value}")
         email_num+=1
     return email_num
 

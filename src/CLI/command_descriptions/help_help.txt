@@ -1,0 +1,5 @@
+Gives information for other commands and this CLI tool
+
+params:
+-command
+    gives information about the selected command
