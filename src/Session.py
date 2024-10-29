@@ -112,7 +112,11 @@ class Session():
         '''
         self.reconnect_if_needed()
         #if not(self.mail_SMTP is None):
-        
+        del message["To"]
+        message["To"] = reciever
+        del message["From"]
+        message["From"] = self.sender_email
+        print(message)
         return self.mail_SMTP.send_message(msg=message,from_addr=self.sender_email,to_addrs=reciever,)
     def terminate(self) -> None:
         '''

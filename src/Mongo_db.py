@@ -334,7 +334,7 @@ def decrypt_values_in_db(connection:MongoClient,property_name:str = "email",db_n
 
 def get_encrypted_version(connection:MongoClient,email:str,db_name = "Emails", collection_name = "Emails"):
     '''
-    gets the encrypted version from the database if it exists
+    gets the encrypted version of an email from the database if it exists
     '''
     client = connection
 
@@ -348,3 +348,13 @@ def get_encrypted_version(connection:MongoClient,email:str,db_name = "Emails", c
     if email:
         return email[0][1]
     return None
+
+def from_txt_to_db(path_to_txt_file,database_connection,should_have_second_and_top_level_domain=""):
+    '''
+    Gets emails stored on a txt line and adds them line by line to the database if they were not yet there
+    '''
+    with open(path_to_txt_file,"r") as txt:
+        for email in txt.readlines():
+            email = email.strip("\n")
+            if email.endswith(should_have_second_and_top_level_domain):
+                print(add_unique_email(database_connection,email))

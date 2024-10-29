@@ -7,20 +7,7 @@ from email.message import EmailMessage
 import pymongo
 from Mongo_db import *
 import time
-'''
-Example for the config:
-EMAIL=sender@outlook.com
-PASSWORD=VerySecurePassword
-SERVER_EMAIL=smtp-mail.outlook.com
-PORT=587
-RECIEVER_EMAIL=reciever@outlook.com
 
-
-EMAIL_CONTENTS_PATH_TXT=./message.txt
-EMAIL_CONTENTS_PATH_HTML=./message.html
-SUBJECT=Subject
-
-'''
 def clear_inactive_emails(database_connection:MongoClient,reader_session:Session,mark_seen = True):
     '''
     Removes all emails that are inactive by checking the reply from mailer-daemon@gmx.net and removing the mentioned email
@@ -83,50 +70,3 @@ def remove_users_who_unsubscribed(session:Session,database_connection:MongoClien
             _from = _from[:_from.rfind("@")] + "@leerling.o2g2.nl"
             update_subscribed_by_email(database_connection, encrypt_value(_from))
             print(f"unsubscribed user: {_from}")
-def from_txt_to_db(path_to_txt_file,database_connection,should_have_second_and_top_level_domain=""):
-    '''
-    Gets emails stored on a txt line and adds them line by line to the database if they were not yet there
-    '''
-    with open(path_to_txt_file,"r") as txt:
-        for email in txt.readlines():
-            email = email.strip("\n")
-            if email.endswith(should_have_second_and_top_level_domain):
-                print(add_unique_email(database_connection,email))
-
-if __name__ == "__main__":
-    
-    #initialising variables
-    dotenv.load_dotenv()
-    config=dotenv.dotenv_values()
-    
-    test_message = email_constructor(
-        None, #Will be replaced inside of the function based on the recieving email
-        config["EMAIL"],
-        config["SUBJECT"],
-        view_html(config["EMAIL_CONTENTS_PATH_TXT"]),
-        view_html(config["EMAIL_CONTENTS_PATH_HTML"])
-    )
-
-    session = Session(server_email_SMTP=config["SERVER_EMAIL"],
-                    server_port_SMTP=config["PORT"],
-                    sender_email=config["EMAIL"],
-                    sender_password=config["PASSWORD"],
-                    mode="w")
-    
-    reader_session = Session(sender_email=config["READER_EMAIL"],
-                    sender_password=config["READER_EMAIL_PASSWORD"],
-                    server_port_IMAP= 993,
-                    server_email_IMAP="imap.gmx.com", #imap-mail.outlook.com
-                    mode="r")
-    log("Sessions started")   
-    database_connection = MongoClient(config["MONGO_DB_LINK"])
-
-    #-----
-    
-
-    
-    #-----
-
-    database_connection.close()
-    reader_session.terminate()
-        
