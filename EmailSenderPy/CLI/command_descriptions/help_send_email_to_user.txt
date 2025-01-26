@@ -1,0 +1,20 @@
+send_email_to_user
+Description:
+Sends email to a specified user. The command requires certain configuration elements
+to be set up in advance.
+
+Usage:
+
+send_email_to_user --user=<some@email.com>
+
+
+Requirments to work:
+.env file should contain the following
+SENDER_EMAIL= <email from which you are planning to send the emails>
+SENDER_EMAIL_PORT= <an SMTP port for the server email (mostly 587)>
+SENDER_EMAIL_PASSWORD = <password of your email>
+SERVER_SENDER_EMAIL <SMTP server email of your email provider>
+
+SUBJECT = <subject of your email>
+EMAIL_CONTENTS_PATH_TXT = <Path/to/your/email.txt>
+EMAIL_CONTENTS_PATH_HTML = <Path/to/your/email.html>

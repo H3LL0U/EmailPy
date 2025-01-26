@@ -1,8 +1,0 @@
-Gives information for other commands and this CLI tool
-
-params:
---command (optional)
-    gives information about the selected command
-
-Usage:
-help --command=<some_command>

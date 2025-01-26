@@ -1,18 +1,19 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 import dotenv
-from email_creator import email_constructor, view_html 
-from Session import Session
+#from email_creator import email_constructor, view_html 
+from EmailSenderPy.email_creator import email_constructor, view_html 
+from EmailSenderPy.Session import Session
 
 from email.message import EmailMessage
 #from MYSQL import *
 import pymongo
-from Mongo_db import *
+from EmailSenderPy.Mongo_db import *
 import time
 import unittest
-from cryptography_db import *
+from EmailSenderPy.cryptography_db import *
 '''
 In order for the test to run properly there should be a local mongoDB database hosted on the machine
 '''

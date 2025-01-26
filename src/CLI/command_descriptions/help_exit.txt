@@ -1,7 +1,0 @@
-Exits the CLI
-
--params:
-No params
-
-Usage:
-exit
