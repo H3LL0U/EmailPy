@@ -1,9 +1,14 @@
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
 import os.path
 from pymongo import MongoClient
-from Session import Session as Email_Session
+from EmailSenderPy import Session as Email_Session
 from email.message import EmailMessage
-import Mongo_db
-import email_manager
+from EmailSenderPy import Mongo_db
+from EmailSenderPy import email_manager
+
 class CLI_session():
     def __init__(self,db_connection:MongoClient|None = None, email_reader_session:Email_Session|None = None,email_sender_session:Email_Session|None = None, preconstructed_email:EmailMessage|None = None  ):
         self.running = True
@@ -24,7 +29,8 @@ class CLI_session():
         print(f"EmailSender CLI tool version {self.version}\nType help voor commands")
         while self.running:
             user_command = self.split_into_subcategories(input())
-            
+            if user_command is None:
+                continue
             match user_command["command"]:
                 case "help" :
                     self.help_command(user_command)
@@ -70,6 +76,7 @@ class CLI_session():
     
     def get_command_description(self,command_name):
         absolute_path = os.path.dirname(__file__)
+        
         
         with open(f"{absolute_path}/command_descriptions/help_{command_name}.txt" ,"r") as help_command:
             return help_command.read()

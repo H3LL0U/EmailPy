@@ -130,6 +130,9 @@ class TestEmailFunctions(unittest.TestCase):
 
         result = add_unique_email(self.client, new_email, db_name=self.db_name, collection_name=self.collection_name, encrypt=False)
         self.assertIsNone(result)
+        decrypt_values_in_db(self.client)
+        new_obj = obj_id = add_unique_email(self.client, new_email, db_name=self.db_name, collection_name=self.collection_name, encrypt=True)
+        self.assertIsNone(new_obj)
     def test_delete_document_by_email(self):
         delete_result = delete_document_by_email(self.client, "test1@gmail.com", db_name=self.db_name, collection_name=self.collection_name)
         self.assertIsNotNone(delete_result)

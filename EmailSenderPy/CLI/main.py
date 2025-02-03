@@ -15,14 +15,15 @@ EMAIL_CONTENTS_PATH_HTML=./message.html
 SUBJECT=Subject
 
 '''
-
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 from CLI_session import CLI_session
 import dotenv
-from email_creator import *
-from Session import Session
+from EmailSenderPy.email_creator import *
+from EmailSenderPy import Session
 
-#from MYSQL import *
-from Mongo_db import *
+from EmailSenderPy.Mongo_db import *
 
 
 
@@ -55,8 +56,8 @@ if __name__ == "__main__":
     log("Sessions started")   
     database_connection = MongoClient(config["MONGO_DB_LINK"])
 
-    CLI_session(db_connection=database_connection,email_reader_session=reader_session,email_sender_session = session,preconstructed_email = test_message)
 
+    encrypt_values_in_db(database_connection)
     database_connection.close()
     reader_session.terminate()
         

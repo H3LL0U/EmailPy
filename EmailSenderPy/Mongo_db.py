@@ -5,7 +5,12 @@ from .cryptography_db import *
 
 DEFAULT_VALUES = {"subscribed":True,
                   "encrypted":False,
-                  "exists":True}
+                  "exists":True,
+                  "visited": 0,
+                  "member_type": "unknown",
+                  "started_typing": False, 
+                  "organisation": "unknown",
+                  "date_of_visit": "None"}
 
 ENABLE_LOGGING =  True
 
@@ -38,7 +43,7 @@ def get_subscribed_emails(mongo_client:MongoClient, db_name="Emails", collection
     return emails
 def get_emails(mongo_client:MongoClient, db_name="Emails", collection_name = "Emails",auto_decrypt = True, query=None):
     '''
-    returns a tupple with (id, decrypted_emails)
+    returns a tuple with (id, decrypted_emails)
     '''
     client = mongo_client
     db = client[db_name]
@@ -155,60 +160,42 @@ def get_id_of_an_email(mongo_client:MongoClient,email:str,db_name:str = "Emails"
 
 
 
-def add_unique_email(mongo_client:MongoClient, email:str, db_name = "Emails", collection_name = "Emails", encrypt = True):
+def add_unique_email(mongo_client: MongoClient, email: str, db_name="Emails", collection_name="Emails", encrypt=True):
     """
     Add an email to the MongoDB collection if it is unique.
     
-    Parameters:
-    - mongo_uri: The URI for the MongoDB connection
-    - db_name: The name of the database
-    - collection_name: The name of the collection
-    - email: The email address to be added
-    - encrypt: encrypts the email when inserted
     Returns:
-    - An object_Id of an email that was created (if it wasn't already created)
-    -If the object already exists or there is a fail returns None
+    - The inserted document's ObjectId if successful.
+    - None if the email already exists or an error occurs.
     """
     email = email.strip("\n")
-    
+
     try:
         client = mongo_client
         db = client[db_name]
         collection = db[collection_name]
+
         
+        existing_email = collection.find_one({"email": encrypt_value(email)}) or collection.find_one({"email": email})
+        if existing_email:
+            return None  
+
         
-        all_emails = get_emails(client,db_name=db_name,collection_name=collection_name)
-        
-        try:
-            
-            idx_email = [email[1] for email in all_emails].index(email)
-        except ValueError:
-            
-        
-        
-            
-            
-        
+        query = DEFAULT_VALUES.copy()  
+        query["encrypted"] = encrypt
+        query["email"] = encrypt_value(email) if encrypt else email
+
         # Insert the new email
-            if encrypt:
-                query = DEFAULT_VALUES
-                query["encrypted"] = True
-                query["email"] = encrypt_value(email)
-            else:
-                query = DEFAULT_VALUES
-                query["email"] = email
-            
-                
-            result = collection.insert_one(query)
-            
-            if result.inserted_id:
+        result = collection.insert_one(query)
+        return result.inserted_id if result.inserted_id else None
 
-                return result.inserted_id
+    except errors.DuplicateKeyError:
+        print(f"Duplicate email detected: {email}")
+        return None  
 
-        return None
-    
     except errors.PyMongoError as e:
-        return None
+        print(f"Database error: {e}")
+        return None  
 
 def get_ammount_documents(mongo_client:MongoClient,db_name = "Emails",collection="Emails"):
     db = mongo_client[db_name]
@@ -349,12 +336,13 @@ def get_encrypted_version(connection:MongoClient,email:str,db_name = "Emails", c
         return email[0][1]
     return None
 
-def from_txt_to_db(path_to_txt_file,database_connection,should_have_second_and_top_level_domain=""):
+def from_txt_to_db(path_to_txt_file,database_connection,should_have_second_and_top_level_domain="", encoding = "utf-8"):
     '''
     Gets emails stored on a txt line and adds them line by line to the database if they were not yet there
     '''
-    with open(path_to_txt_file,"r") as txt:
+    with open(path_to_txt_file,"r", encoding=encoding) as txt:
         for email in txt.readlines():
             email = email.strip("\n")
             if email.endswith(should_have_second_and_top_level_domain):
                 print(add_unique_email(database_connection,email))
+                

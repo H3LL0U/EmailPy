@@ -1,5 +1,5 @@
 import dotenv
-from email_creator import *
+from .email_creator import *
 from .Session import Session
 
 from email.message import EmailMessage
