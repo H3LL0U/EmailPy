@@ -56,6 +56,7 @@ if __name__ == "__main__":
     log("Sessions started")   
     database_connection = MongoClient(config["MONGO_DB_LINK"])
 
+    CLI_session(db_connection=database_connection,email_reader_session=reader_session,email_sender_session = session,preconstructed_email = test_message)
 
     encrypt_values_in_db(database_connection)
     database_connection.close()
