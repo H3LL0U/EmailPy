@@ -142,7 +142,8 @@ def update_subscribed_by_email(mongo_client:MongoClient,email,new_subscribed_val
     
 
     
-
+def get_visited_ammount(mongo_client:MongoClient, db_name:str, collection_name:str):
+    return len(get_emails(mongo_client,auto_decrypt=False,query={"encrypted":False,"visited":True},collection_name=collection_name,db_name=db_name,))
     
 
 def get_id_of_an_email(mongo_client:MongoClient,email:str,db_name:str = "Emails",collection_name:str = "Emails"):
