@@ -146,12 +146,12 @@ def get_visited_ammount(mongo_client:MongoClient, db_name:str, collection_name:s
     return len(get_emails(mongo_client,auto_decrypt=False,query={"encrypted":False,"visited":True},collection_name=collection_name,db_name=db_name,))
     
 
-def get_id_of_an_email(mongo_client:MongoClient,email:str,db_name:str = "Emails",collection_name:str = "Emails"):
+def get_id_of_an_email(mongo_client:MongoClient,email:str,db_name:str = "Emails",collection_name:str = "Emails", auto_decrypt = True):
     '''
     returns: objectID of an email from the database by email name
     If no email returns False
     '''
-    all_emails = get_emails(mongo_client,db_name=db_name,collection_name=collection_name,)
+    all_emails = get_emails(mongo_client,db_name=db_name,collection_name=collection_name,auto_decrypt=auto_decrypt)
     
     
     email_dict = {email[1]: email[0] for email in all_emails}
