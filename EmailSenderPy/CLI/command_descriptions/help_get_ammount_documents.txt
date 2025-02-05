@@ -1,0 +1,12 @@
+get_ammount_documents
+Description:
+returns a number of how many entries there are in a database
+
+Usage:
+
+get_ammount_documents
+
+
+Requirments to work:
+.env file should contain the following
+MONGO_DB_LINK = <LINK THROUGH WHICH MONGODB CAN BE ACCESSED> 

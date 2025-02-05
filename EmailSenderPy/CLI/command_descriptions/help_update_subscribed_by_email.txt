@@ -1,0 +1,16 @@
+update_subscribed_by_email
+Description:
+updates the value of susbscribed of a particular email
+
+NOTE:
+not recomended to use because the newer value gets interpreted as a string
+so update the value using the mongodb instead
+
+Usage:
+
+update_subscribed_by_email --email=<some_email@mail.com> --new_subscribed_value=<new_string_value>
+
+
+Requirments to work:
+.env file should contain the following
+MONGO_DB_LINK = <LINK THROUGH WHICH MONGODB CAN BE ACCESSED> 

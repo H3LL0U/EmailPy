@@ -1,0 +1,12 @@
+add_property_to_documents
+Description:
+adds a new property to all of the documents and sets it value
+
+Usage:
+
+add_property_to_documents --property_name=some_property --property_value="some_default_value"
+
+
+Requirments to work:
+.env file should contain the following
+MONGO_DB_LINK = <LINK THROUGH WHICH MONGODB CAN BE ACCESSED> 

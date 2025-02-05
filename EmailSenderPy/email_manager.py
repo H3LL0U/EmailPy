@@ -70,3 +70,13 @@ def remove_users_who_unsubscribed(session:Session,database_connection:MongoClien
             _from = _from[:_from.rfind("@")] + "@leerling.o2g2.nl"
             update_subscribed_by_email(database_connection, encrypt_value(_from))
             print(f"unsubscribed user: {_from}")
+
+def send_email_to_user(email_session: Session, user:str,msg:EmailMessage) -> None:
+    #check correct configuration
+    if email_session is None:
+        print("No database session sender was provided. Check configuration")
+        return
+        
+
+    print(f"Sending an email to {user}")
+    email_session.send_email(msg,user)

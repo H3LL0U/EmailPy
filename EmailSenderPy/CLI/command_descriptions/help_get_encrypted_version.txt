@@ -1,0 +1,13 @@
+get_encrypted_version
+Description:
+shows decrypted value of an email in the console
+
+Usage:
+
+get_encrypted_version --email=<some_email@email.com>
+
+
+Requirments to work:
+.env file should contain the following
+MONGO_DB_LINK = <LINK THROUGH WHICH MONGODB CAN BE ACCESSED> 
+ENCRYPTION_KEY = <SOME VALUE FOR DECRYPTION>

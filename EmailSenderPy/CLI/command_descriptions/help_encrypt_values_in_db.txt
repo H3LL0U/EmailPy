@@ -1,0 +1,13 @@
+encrypt_values_in_db
+Description:
+encrypts all values in the database that are not set to be encrypted
+
+Usage:
+
+encrypt_values_in_db --property_name=<(Optional "email" by default) value that gets encrypted>
+
+
+Requirments to work:
+.env file should contain the following
+MONGO_DB_LINK = <LINK THROUGH WHICH MONGODB CAN BE ACCESSED> 
+ENCRYPTION_KEY = <SOME VALUE FOR DECRYPTION>

@@ -1,0 +1,12 @@
+get_id_of_an_email
+Description:
+returns an _id value of a provided email
+
+Usage:
+
+get_id_of_an_email --email=<some_email@email.com>
+
+
+Requirments to work:
+.env file should contain the following
+MONGO_DB_LINK = <LINK THROUGH WHICH MONGODB CAN BE ACCESSED> 

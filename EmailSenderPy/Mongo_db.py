@@ -10,7 +10,8 @@ DEFAULT_VALUES = {"subscribed":True,
                   "member_type": "unknown",
                   "started_typing": False, 
                   "organisation": "unknown",
-                  "date_of_visit": "None"}
+                  "date_of_visit": "None",
+                  "date_of_email": "None"}
 
 ENABLE_LOGGING =  True
 
@@ -142,7 +143,7 @@ def update_subscribed_by_email(mongo_client:MongoClient,email,new_subscribed_val
     
 
     
-def get_visited_ammount(mongo_client:MongoClient, db_name:str, collection_name:str):
+def get_visited_ammount(mongo_client:MongoClient, db_name:str = "Emails", collection_name:str = "Emails"):
     return len(get_emails(mongo_client,auto_decrypt=False,query={"encrypted":False,"visited":True},collection_name=collection_name,db_name=db_name,))
     
 
@@ -204,7 +205,7 @@ def get_ammount_documents(mongo_client:MongoClient,db_name = "Emails",collection
 
     return collection.count_documents({})
 
-def delete_document_by_email(connection:MongoClient,email:str, db_name = "Emails", collection_name = "Emails"):
+def delete_document_by_email(mongo_client:MongoClient,email:str, db_name = "Emails", collection_name = "Emails"):
     """
     Remove a document from MongoDB by its email value.
     
@@ -215,12 +216,12 @@ def delete_document_by_email(connection:MongoClient,email:str, db_name = "Emails
     :return: The result of the delete operation 
     """
     
-    db = connection[db_name]
+    db = mongo_client[db_name]
     collection = db[collection_name]
     
     # Delete one document that matches the email
 
-    id_email = get_id_of_an_email(connection,email=email,collection_name=collection_name,db_name=db_name)
+    id_email = get_id_of_an_email(mongo_client,email=email,collection_name=collection_name,db_name=db_name)
     if id_email is None:
         log("Email not found")
         return None
@@ -324,18 +325,7 @@ def get_encrypted_version(connection:MongoClient,email:str,db_name = "Emails", c
     '''
     gets the encrypted version of an email from the database if it exists
     '''
-    client = connection
-
-    
-    db = client[db_name]
-    collection = db[collection_name]
-
-    email_id = get_id_of_an_email(connection,email,db_name=db_name,collection_name=collection_name)
-    
-    email = get_emails(client,db_name=db_name,collection_name=collection_name,auto_decrypt=False,query={"encrypted":False,"_id":email_id})
-    if email:
-        return email[0][1]
-    return None
+    return encrypt_value(email)
 
 def from_txt_to_db(path_to_txt_file,database_connection,should_have_second_and_top_level_domain="", encoding = "utf-8"):
     '''

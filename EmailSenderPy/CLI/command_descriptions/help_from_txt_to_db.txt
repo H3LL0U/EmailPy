@@ -1,0 +1,20 @@
+from_txt_to_db
+Description:
+adds emails from a txt file at specified location to the database
+emails should be stored in the following format
+
+email_1@mail.com
+email_2@mail.com
+email_3@mail.com
+
+...
+
+Usage:
+
+from_txt_to_db --path_to_txt_file=<some/path/to/txt/file> --should_have_second_and_top_level_domain<(Optional) only add emails if they add with specified string>
+
+
+Requirments to work:
+.env file should contain the following
+MONGO_DB_LINK = <LINK THROUGH WHICH MONGODB CAN BE ACCESSED> 
+ENCRYPTION_KEY = <SOME VALUE FOR DECRYPTION>

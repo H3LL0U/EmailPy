@@ -1,0 +1,12 @@
+add_unique_email
+Description:
+Adds an unique email to the database
+
+Usage:
+
+add_unique_email --email=<some_email@email.com>
+
+
+Requirments to work:
+.env file should contain the following
+MONGO_DB_LINK = <LINK THROUGH WHICH MONGODB CAN BE ACCESSED> 

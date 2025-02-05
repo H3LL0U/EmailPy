@@ -8,6 +8,10 @@ from EmailSenderPy import Session as Email_Session
 from email.message import EmailMessage
 from EmailSenderPy import Mongo_db
 from EmailSenderPy import email_manager
+from command_from_function import Command, create_commands_by_imports
+
+
+
 
 class CLI_session():
     def __init__(self,db_connection:MongoClient|None = None, email_reader_session:Email_Session|None = None,email_sender_session:Email_Session|None = None, preconstructed_email:EmailMessage|None = None  ):
@@ -18,8 +22,22 @@ class CLI_session():
         self.email_sender_session = email_sender_session
         self.db_connection = db_connection
         self.preconstructed_email = preconstructed_email
-
-
+        BLACK_LIST = ["convert_string_to_urlsafe_base64",
+                      "email_constructor",
+                      "log",
+                      "pad",
+                      "remove_newline_from_emails",
+                      "replace_text_of_the_message",
+                      "unpad",
+                      "view_html"] #functions which should not be included
+        self.all_commands = create_commands_by_imports(email_manager,black_list=BLACK_LIST,mongo_client = db_connection,
+                                                       email_session_reader = email_reader_session,
+                                                       email_session = email_sender_session,
+                                                       msg = preconstructed_email,
+                                                       database_connection = db_connection,
+                                                       session = email_reader_session,
+                                                       connection = db_connection)
+        
 
 
 
@@ -29,6 +47,18 @@ class CLI_session():
         print(f"EmailSender CLI tool version {self.version}\nType help voor commands")
         while self.running:
             user_command = self.split_into_subcategories(input())
+
+
+            for command in self.all_commands:
+                
+                if not user_command is None and command.name == user_command["command"]:
+                    try:
+                        print(command.call_command(**user_command["params"]))
+                    except TypeError as e:
+                        print("Not all necessary parameters were satisfied or there are non-existant parameters")
+                    user_command = None
+                    break
+
             if user_command is None:
                 continue
             match user_command["command"]:
@@ -38,11 +68,11 @@ class CLI_session():
                 case "exit":
                     self.exit_command(user_command)
 
-                case "send_emails_to_users":
-                    self.send_emails_to_users_command(user_command)
+                #case "send_emails_to_users":
+                #    self.send_emails_to_users_command(user_command)
 
-                case "send_email_to_user":
-                    self.send_email_to_user_command(user_command)
+                #case "send_email_to_user":
+                #    self.send_email_to_user_command(user_command)
 
                 case _:
                     print(f"Could not find the command {user_command["command"]}")
@@ -143,51 +173,8 @@ class CLI_session():
             Availabe commands:
             {"\n".join(self.implemented_commands)}
             '''.replace("    ",""))
+    
 
-    def send_emails_to_users_command(self,user_command:dict[str:str,str:any]) -> None:
-        #check for correct configuration
-        if self.db_connection is None:
-            print("No email session was provided. Check configuration")
-            return
-        if self.email_sender_session is None:
-            print("No database session sender was provided. Check configuration")
-            return
-        if self.email_reader_session is None:
-            print("No database session reader was provided. Check configuration")
-        if self.preconstructed_email is None:
-            print("No preconstructed email was provided. Check configuration")
-        #setting parameters
-        
-        #default values:
-        LIMIT = -1 #no limit
-        DELAY = 600 #600 seconds between emails
-        START_FROM = 0
-        if "limit" in user_command["params"]:
-            LIMIT = user_command["params"]["limit"]
-        if "delay" in user_command["params"]:
-            DELAY = user_command["params"]["delay"]
-        if "start_from" in user_command["params"]:
-            START_FROM =  user_command["params"]["start_from"]
-        
-        print(f"Starting sending emails with the following parameters\ndelay: {DELAY}\nlimit: {LIMIT}\nstart_from: {START_FROM}")
-
-
-        email_manager.send_emails_to_users(self.db_connection,self.email_reader_session,self.email_sender_session,LIMIT,self.preconstructed_email,START_FROM,DELAY)
-    def send_email_to_user_command(self,user_command:dict[str:str,str:any]) -> None:
-        #check correct configuration
-        if self.email_sender_session is None:
-            print("No database session sender was provided. Check configuration")
-            return
-        
-        #check params
-        if "user" in user_command["params"]:
-            USER = user_command["params"]["user"]
-
-        else:
-            print("No --user specified. Please specify the user")
-            return
-        print(f"Sending an email to {USER}")
-        self.email_sender_session.send_email(self.preconstructed_email,USER)
         
 
     
