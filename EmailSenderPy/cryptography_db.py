@@ -3,10 +3,10 @@ import base64
 import hashlib
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
-
+import os
 dotenv.load_dotenv()
 config = dotenv.dotenv_values()
-
+config = dict(os.environ) | config #adding environment values on top of .env
 def convert_string_to_urlsafe_base64(string_to_encode: str) -> bytes:
     """Generate a 16-byte key from a string using SHA256 and Base64 encoding."""
     hash_value = hashlib.sha256(string_to_encode.encode()).digest()
