@@ -336,4 +336,60 @@ def from_txt_to_db(path_to_txt_file,database_connection,should_have_second_and_t
             email = email.strip("\n")
             if email.endswith(should_have_second_and_top_level_domain):
                 print(add_unique_email(database_connection,email))
-                
+
+def get_email_properties(mongo_client: MongoClient, email: str, db_name="Emails", collection_name="Emails", auto_decrypt=True):
+    """
+    Retrieves all properties and their values for a given email.
+    Returns a dictionary:
+    {
+        "property1": value1,
+        "property2": value2,
+        ...
+    }
+    """
+    client = mongo_client
+    db = client[db_name]
+    collection = db[collection_name]
+
+    # Find the document based on email
+
+    doc = collection.find_one({"email": email})
+    if not doc: 
+        doc = collection.find_one({"email" : encrypt_value(email)})
+    
+
+    if not doc:
+        return None  # Email not found
+
+    
+    if doc.get("encrypted", True) and auto_decrypt and "email" in doc:
+        doc["email"] = decrypt_value(doc["email"])
+
+    return doc
+def get_documents_by_query(mongo_client: MongoClient, query=None, db_name="Emails", collection_name="Emails", limit=None):
+    """
+    Retrieves documents from a MongoDB collection based on a query.
+    
+    Parameters:
+    - mongo_client (MongoClient): The MongoDB client instance.
+    - query (dict, optional): The filter query for retrieving documents (default: {}).
+    - db_name (str): The name of the database (default: "Emails").
+    - collection_name (str): The name of the collection (default: "Emails").
+    - limit (int, optional): The maximum number of documents to return (default: None - returns all).
+
+    Returns:
+    - list of dicts: A list of matching documents.
+    """
+    client = mongo_client
+    db = client[db_name]
+    collection = db[collection_name]
+
+    if query is None:
+        query = {}
+
+    cursor = collection.find(query)
+
+    if limit:
+        cursor = cursor.limit(limit)
+
+    return list(cursor)

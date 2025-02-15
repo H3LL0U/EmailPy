@@ -154,6 +154,38 @@ class TestEmailFunctions(unittest.TestCase):
         self.assertEqual(encrypted,self.encrypted_email)
         self.assertIsNotNone(self.collection.find_one({"email":self.encrypted_email}))
     
+
+    def test_get_email_properties(self):
+        test_one = get_email_properties(self.client,"adojasdoiaj",db_name=self.db_name,collection_name=self.collection_name)
+        self.assertIsNone(test_one)
+
+
+        test_two = get_email_properties(self.client,"test3@gmail.com",db_name=self.db_name,collection_name=self.collection_name,auto_decrypt=True)
+        value = {"subscribed": True, "encrypted": True, "exists":True,"email":"test3@gmail.com"}
+        del test_two["_id"]
+        self.assertEqual(value,test_two)
+
+        test_three = get_email_properties(self.client,"test3@gmail.com",db_name=self.db_name,collection_name=self.collection_name,auto_decrypt=False)
+        value = {"subscribed": True, "encrypted": True, "exists":True,"email":self.encrypted_email}
+        del test_three["_id"]
+
+        self.assertEqual(value,test_three)
+
+        test_four = get_email_properties(self.client,"test1@gmail.com",db_name=self.db_name,collection_name=self.collection_name)
+        value = {"email":"test1@gmail.com", "subscribed": True, "encrypted": False,"exists":True}
+        del test_four["_id"]
+        self.assertEqual(value,test_four)
+    def test_get_documents_by_query(self):
+        docs = get_documents_by_query(self.client,{},db_name=self.db_name,collection_name= self.collection_name)
+        emails = [doc["email"] for doc in docs]
+        self.assertTrue("test1@gmail.com" in emails)
+        self.assertTrue("test2@gmail.com" in emails)
+        self.assertTrue(self.encrypted_email in emails)
+
+        docs = get_documents_by_query(self.client,{"encrypted": {"$ne":True}},db_name=self.db_name,collection_name= self.collection_name)
+        emails = [doc["email"] for doc in docs]
+        self.assertFalse(self.encrypted_email in emails)
+
 if __name__ == "__main__":
     unittest.main()
 

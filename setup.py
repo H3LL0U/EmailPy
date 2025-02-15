@@ -7,7 +7,7 @@ def parse_requirements(filename):
 
 setup(
     name="EmailSenderPy",  
-    version="0.0.1",  
+    version="0.0.11",  
     description="A Python package for sending emails to users from a MongoDB database",
     long_description=open("./README.MD").read(),  
     long_description_content_type="text/markdown", 
