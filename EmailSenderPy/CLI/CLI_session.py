@@ -33,7 +33,6 @@ class CLI_session():
         self.all_commands = create_commands_by_imports(email_manager,black_list=BLACK_LIST,mongo_client = db_connection,
                                                        email_session_reader = email_reader_session,
                                                        email_session = email_sender_session,
-                                                       msg = preconstructed_email,
                                                        database_connection = db_connection,
                                                        session = email_reader_session,
                                                        connection = db_connection)

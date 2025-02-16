@@ -34,13 +34,6 @@ if __name__ == "__main__":
     dotenv.load_dotenv()
     config=dotenv.dotenv_values()
     
-    test_message = email_constructor(
-        None, #Will be replaced inside of the function based on the recieving email
-        config["SERVER_SENDER_EMAIL"],
-        config["SUBJECT"],
-        view_html(config["EMAIL_CONTENTS_PATH_TXT"]),
-        view_html(config["EMAIL_CONTENTS_PATH_HTML"])
-    )
 
     session = Session(server_email_SMTP=config["SERVER_SENDER_EMAIL"],
                     server_port_SMTP=config["SENDER_EMAIL_PORT"],
@@ -56,7 +49,7 @@ if __name__ == "__main__":
     log("Sessions started")   
     database_connection = MongoClient(config["MONGO_DB_LINK"])
 
-    CLI_session(db_connection=database_connection,email_reader_session=reader_session,email_sender_session = session,preconstructed_email = test_message)
+    CLI_session(db_connection=database_connection,email_reader_session=reader_session,email_sender_session = session)
 
     encrypt_values_in_db(database_connection)
     database_connection.close()

@@ -22,7 +22,6 @@ def email_constructor(to:str,sender_email:str,subject:str,message_content:str, m
         
 
     return message
-from email.message import EmailMessage
 
 
 def replace_text_of_the_message(msg:EmailMessage,old_str:str,new_str:str):

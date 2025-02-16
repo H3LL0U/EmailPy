@@ -5,7 +5,7 @@ to be set up in advance.
 
 Usage:
 
-send_email_to_user --user=<some@email.com>
+send_email_to_user --email=<some@email.com> --msg_location = <path/to/email/txt> --subject=<some_subject> --message_location_html = <optional> --email_type=<type of email you send to update in the db(optional)> --text_to_replace=<some text you want to replace in the email (optional)> --new_text=<new value for the selected text(optional)> 
 
 
 Requirments to work:
@@ -15,6 +15,3 @@ SENDER_EMAIL_PORT= <an SMTP port for the server email (mostly 587)>
 SENDER_EMAIL_PASSWORD = <password of your email>
 SERVER_SENDER_EMAIL <SMTP server email of your email provider>
 
-SUBJECT = <subject of your email>
-EMAIL_CONTENTS_PATH_TXT = <Path/to/your/email.txt>
-EMAIL_CONTENTS_PATH_HTML = <Path/to/your/email.html>

@@ -5,8 +5,7 @@ to be set up in advance, including database connections and email sessions, and 
 and the starting point for sending.
 
 Usage:
-send_emails_to_users --limit=<number> --delay=<seconds> --start_from=<index>
-
+send_emails_to_users --msg_location = <path/to/email/txt> --subject=<some_subject> --message_location_html = <optional> --email_type=<type of email you send to update in the db(optional)> --text_to_replace=<some text you want to replace in the email (optional)> --new_text=<new value for the selected text(optional)> --limit=<number> --timeout_between_emails_seconds=<seconds> --start_from=<index>
 
 --limit=<number> (optional):
 Sets a maximum number of emails to send. Defaults to no limit (-1), which sends emails to all users.
@@ -29,6 +28,4 @@ SENDER_EMAIL_PASSWORD <password for this email>
 READER_EMAIL_PORT = <IMAP port (mostly 993)>
 SERVER_READER_EMAIL = <IMAP server email of your email provider>
 
-SUBJECT = <subject of your email>
-EMAIL_CONTENTS_PATH_TXT = <Path/to/your/email.txt>
-EMAIL_CONTENTS_PATH_HTML = <Path/to/your/email.html>
+
