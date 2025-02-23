@@ -118,6 +118,26 @@ class Session():
         message["From"] = self.sender_email
         
         return self.mail_SMTP.send_message(msg=message,from_addr=self.sender_email,to_addrs=reciever,)
+    
+    def update_IMAP(self, message:EmailMessage, reciever:str,folder_name = "Sent SMTP"):
+        del message["To"]
+        message["To"] = reciever
+        del message["From"]
+        message["From"] = self.sender_email
+        try:
+            
+            imap_client = self.mail_IMAP
+            
+            imap_client.append(message=message.as_bytes(),
+                               folder=folder_name,
+                               dt=imaplib.Time2Internaldate(time.time()),
+                               flag_set='\\Seen'
+            )
+        except Exception as e:
+            print(f"Failed to update '{folder_name}' folder: {e}")
+    
+
+    
     def terminate(self) -> None:
         '''
         Terminates the current session

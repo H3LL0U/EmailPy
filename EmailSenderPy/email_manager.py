@@ -18,7 +18,7 @@ def clear_inactive_emails(database_connection:MongoClient,reader_session:Session
         #delete_document_by_email(connection=database_connection,email=inactive_email)
         add_property_to_documents(database_connection,"exists",False,filter_query={"email":inactive_email})
 
-def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:Session,email_session:Session ,msg_location:str, email_type:str,subject:str,message_location_html:str = "", limit = 955,start_from=0,timeout_between_emails_seconds=0):
+def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:Session,email_session:Session ,msg_location:str, email_type:str,subject:str,message_location_html:str = "", limit = 955,start_from=0,timeout_between_emails_seconds=0,update_IMAP=True):
     '''
     Sends the messages to users from the database
 
@@ -41,6 +41,8 @@ def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:S
     message_location_html: path to the email written using html (optional)
 
     timeout_between_emails_seconds: delay between each sent email
+
+    update_IMAP: updates the "sent IMAP" inbox to include the sent e-mail 
     '''
     try:
         remove_users_who_unsubscribed(database_connection=mongo_client,session=email_session_reader)
@@ -62,7 +64,9 @@ def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:S
                                 database_connection=mongo_client,
                                 text_to_replace="https://phishing-awareness-website.onrender.com/",
                                 new_text=f"https://phishing-awareness-website.onrender.com/{email_type}/{encrypt_value(reciever)}",
-                                subject=subject)
+                                subject=subject,
+                                update_IMAP=update_IMAP,
+                                email_session_reader=email_session_reader)
 
                 
 
@@ -91,7 +95,7 @@ def remove_users_who_unsubscribed(session:Session,database_connection:MongoClien
             update_subscribed_by_email(database_connection, encrypt_value(_from))
             print(f"unsubscribed user: {_from}")
 
-def send_email_to_user(email_session: Session, email:str,msg_location:str,subject:str, message_location_html = "", email_type = None, database_connection = None,text_to_replace = None, new_text = None) -> None:
+def send_email_to_user(email_session: Session, email:str,msg_location:str,subject:str, message_location_html = "", email_type = None, database_connection = None,text_to_replace = None, new_text = None,update_IMAP=True,email_session_reader:Session=None) -> None:
     '''
     Sends an email to user based on provided parameters
 
@@ -154,6 +158,8 @@ def send_email_to_user(email_session: Session, email:str,msg_location:str,subjec
     print(f"Sending an email to {email}")
     try:
         email_session.send_email(msg, email)
+        if email_session_reader and update_IMAP:
+            email_session_reader.update_IMAP(msg,email)
     except KeyboardInterrupt:
         print("Stopping...")
     except Exception as e:

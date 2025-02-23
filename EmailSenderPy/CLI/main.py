@@ -10,10 +10,6 @@ PORT=587
 RECIEVER_EMAIL=reciever@outlook.com
 
 
-EMAIL_CONTENTS_PATH_TXT=./message.txt
-EMAIL_CONTENTS_PATH_HTML=./message.html
-SUBJECT=Subject
-
 '''
 import os
 import sys
@@ -51,7 +47,7 @@ if __name__ == "__main__":
 
     CLI_session(db_connection=database_connection,email_reader_session=reader_session,email_sender_session = session)
 
-    encrypt_values_in_db(database_connection)
+    
     database_connection.close()
     reader_session.terminate()
         
