@@ -121,6 +121,8 @@ class TestEmailFunctions(unittest.TestCase):
         self.assertIsNotNone(obj_id)
         obj_id = get_id_of_an_email(self.client, "test2@gmail.com",db_name=self.db_name,collection_name=self.collection_name,)
         self.assertIsNotNone(obj_id)
+        obj_id = get_id_of_an_email(self.client, decrypt_value(self.encrypted_email),db_name=self.db_name,collection_name=self.collection_name)
+        self.assertIsNotNone(obj_id)
     def test_add_unique_email(self):
         new_email = "new_test@gmail.com"
         obj_id = add_unique_email(self.client, new_email, db_name=self.db_name, collection_name=self.collection_name, encrypt=False)
@@ -137,7 +139,10 @@ class TestEmailFunctions(unittest.TestCase):
         delete_result = delete_document_by_email(self.client, "test1@gmail.com", db_name=self.db_name, collection_name=self.collection_name)
         self.assertIsNotNone(delete_result)
         self.assertEqual(delete_result.deleted_count, 1)
-
+        delte_result = delete_document_by_email(self.client, "test3@gmail.com", db_name=self.db_name, collection_name=self.collection_name)
+        self.assertIsNotNone(delete_result)
+        self.assertEqual(delete_result.deleted_count, 1)
+        self.assertEqual(get_ammount_documents(self.client,db_name=self.db_name,collection=self.collection_name),1)
     def test_encrypt_values_in_db(self):
         email_count = encrypt_values_in_db(self.client, property_name="email", db_name=self.db_name, collection_name=self.collection_name, filter_query={"encrypted": False})
         self.assertGreater(email_count, 0)  
@@ -168,8 +173,10 @@ class TestEmailFunctions(unittest.TestCase):
         test_three = get_email_properties(self.client,"test3@gmail.com",db_name=self.db_name,collection_name=self.collection_name,auto_decrypt=False)
         value = {"subscribed": True, "encrypted": True, "exists":True,"email":self.encrypted_email}
         del test_three["_id"]
-
-        self.assertEqual(value,test_three)
+        test_four = get_email_properties(self.client,encrypt_value("test3@gmail.com"),db_name=self.db_name,collection_name=self.collection_name,auto_decrypt=False)
+        
+        del test_four["_id"]
+        self.assertEqual(value,test_four)
 
         test_four = get_email_properties(self.client,"test1@gmail.com",db_name=self.db_name,collection_name=self.collection_name)
         value = {"email":"test1@gmail.com", "subscribed": True, "encrypted": False,"exists":True}

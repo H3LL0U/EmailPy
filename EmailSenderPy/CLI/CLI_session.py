@@ -90,7 +90,7 @@ class CLI_session():
         main_command = split_str[0]
         if len(split_str) >1:
             try:
-                params_and_values = [dict([p_and_val.split("=")]) for p_and_val in split_str[1:]]
+                params_and_values = [dict([p_and_val.split("=",maxsplit=1)]) for p_and_val in split_str[1:]]
 
             except ValueError:
                 print('Syntax error: Ensure parameters are in the form -param=value')

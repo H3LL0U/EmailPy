@@ -18,7 +18,7 @@ def clear_inactive_emails(database_connection:MongoClient,reader_session:Session
         #delete_document_by_email(connection=database_connection,email=inactive_email)
         add_property_to_documents(database_connection,"exists",False,filter_query={"email":inactive_email})
 
-def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:Session,email_session:Session ,msg_location:str, email_type:str,subject:str,message_location_html:str = "", limit = 955,start_from=0,timeout_between_emails_seconds=0,update_IMAP=True):
+def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:Session,email_session:Session ,msg_location:str, email_type:str,subject:str,message_location_html:str = "", limit = 955,start_from=0,timeout_between_emails_seconds=60,update_IMAP=True, replace_text = True,base_url =""):
     '''
     Sends the messages to users from the database
 
@@ -42,10 +42,10 @@ def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:S
 
     timeout_between_emails_seconds: delay between each sent email
 
-    update_IMAP: updates the "sent IMAP" inbox to include the sent e-mail 
+    update_IMAP: updates the "sent IMAP" inbox to include the sent e-mail for the email_session_reader
     '''
     try:
-        remove_users_who_unsubscribed(database_connection=mongo_client,session=email_session_reader)
+        
         
         emails_to_send_to = get_subscribed_emails(mongo_client)[start_from:]
         
@@ -62,8 +62,8 @@ def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:S
                                 message_location_html=message_location_html,
                                 email_type=email_type,
                                 database_connection=mongo_client,
-                                text_to_replace="https://phishing-awareness-website.onrender.com/",
-                                new_text=f"https://phishing-awareness-website.onrender.com/{email_type}/{encrypt_value(reciever)}",
+                                replace_text=replace_text,
+                                base_url = base_url,
                                 subject=subject,
                                 update_IMAP=update_IMAP,
                                 email_session_reader=email_session_reader)
@@ -77,25 +77,8 @@ def send_emails_to_users(mongo_client:pymongo.MongoClient,email_session_reader:S
         return
             
             
-def remove_users_who_unsubscribed(session:Session,database_connection:MongoClient):
-    '''
-    Reads all unseen emails and unsubscribes users who replied with "unsubscribe" or had a subject "unsubscribe"
-    
-    session: a Session.Session object with mode="r" enabled
-    database_connection: MongoClient object connection
-    '''
-    unseen_emails = session.read_unseen_emails(mark_seen=True)
-    for email in unseen_emails:
 
-        _from,subject,text, = email.from_,email.subject,email.text
-        text = text.lower()
-        subject = subject.lower()
-        if "unsubscribe" in subject or "unsubscribe" in text:
-            _from = _from[:_from.rfind("@")] + "@leerling.o2g2.nl"
-            update_subscribed_by_email(database_connection, encrypt_value(_from))
-            print(f"unsubscribed user: {_from}")
-
-def send_email_to_user(email_session: Session, email:str,msg_location:str,subject:str, message_location_html = "", email_type = None, database_connection = None,text_to_replace = None, new_text = None,update_IMAP=True,email_session_reader:Session=None) -> None:
+def send_email_to_user(email_session: Session, email:str,msg_location:str,subject:str, message_location_html = "", email_type = None, database_connection = None,update_IMAP=True,email_session_reader:Session=None,base_url = "",replace_text = True) -> None:
     '''
     Sends an email to user based on provided parameters
 
@@ -114,9 +97,13 @@ def send_email_to_user(email_session: Session, email:str,msg_location:str,subjec
                             msg_text_content,
                             msg_html_content)
 
-    if not text_to_replace is None and not new_text is None:
-
-        replace_text_of_the_message(msg,text_to_replace,new_text)
+    if replace_text:
+        replacement_mapping = {r"{{email}}":email,
+                               r"{{sender}}":email_session.sender_email,
+                               r"{{email_type}}": str(email_type),
+                               r"{{site}}":f"{base_url}/{email_type}/{encrypt_value(email)}"}
+        for text_to_replace in replacement_mapping:
+            replace_text_of_the_message(msg,text_to_replace,replacement_mapping[text_to_replace])
 
 
 

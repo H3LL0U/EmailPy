@@ -341,6 +341,7 @@ def get_email_properties(mongo_client: MongoClient, email: str, db_name="Emails"
     """
     Retrieves all properties and their values for a given email.
     Returns a dictionary:
+    can also take the encrypted version of an email in the 'email' paramter
     {
         "property1": value1,
         "property2": value2,

@@ -5,8 +5,16 @@ to be set up in advance.
 
 Usage:
 
-send_email_to_user --email=<some@email.com> --msg_location = <path/to/email/txt> --subject=<some_subject> --message_location_html = <optional> --email_type=<type of email you send to update in the db(optional)> --text_to_replace=<some text you want to replace in the email (optional)> --new_text=<new value for the selected text(optional)> 
+send_email_to_user --email=<some@email.com> --msg_location = <path/to/email/txt> --subject=<some_subject> --message_location_html = <optional> --email_type=<type of email you send to update in the db(optional)> --replace_text=<0 or 1 based on if you want to replace some strings in the text (optional)> --base_url=<base of the url that will be used as the replacement see bellow (optional)>
 
+if replace text is set to True the text in the email will be replaced as followed based on the provided paramters:
+{{email}} : email,
+{{sender}} : email_session.sender_email,
+{{email_type}} : str(email_type),
+{{site}} : {base_url}/{email_type}/{encrypt_value(email)}
+
+left side is the old text
+right side is the new text
 
 Requirments to work:
 .env file should contain the following
