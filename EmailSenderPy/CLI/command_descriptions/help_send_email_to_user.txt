@@ -12,6 +12,8 @@ if replace text is set to True the text in the email will be replaced as followe
 {{sender}} : email_session.sender_email,
 {{email_type}} : str(email_type),
 {{site}} : {base_url}/{email_type}/{encrypt_value(email)}
+{{subject}}:subject,
+{{time}}: {tijd op het moment van het verzenden}
 
 left side is the old text
 right side is the new text

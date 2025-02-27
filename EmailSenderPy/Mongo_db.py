@@ -152,13 +152,13 @@ def get_id_of_an_email(mongo_client:MongoClient,email:str,db_name:str = "Emails"
     returns: objectID of an email from the database by email name
     If no email returns False
     '''
-    all_emails = get_emails(mongo_client,db_name=db_name,collection_name=collection_name,auto_decrypt=auto_decrypt)
+    email = get_email_properties(mongo_client,email=email,db_name=db_name,collection_name=collection_name,auto_decrypt=auto_decrypt)
     
     
-    email_dict = {email[1]: email[0] for email in all_emails}
+    
 
     
-    return email_dict.get(email, None)
+    return email["_id"]
 
 
 

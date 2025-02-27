@@ -101,7 +101,9 @@ def send_email_to_user(email_session: Session, email:str,msg_location:str,subjec
         replacement_mapping = {r"{{email}}":email,
                                r"{{sender}}":email_session.sender_email,
                                r"{{email_type}}": str(email_type),
-                               r"{{site}}":f"{base_url}/{email_type}/{encrypt_value(email)}"}
+                               r"{{site}}":f"{base_url}/{email_type}/{encrypt_value(email)}",
+                               r"{{subject}}":subject,
+                               r"{{time}}":str(datetime.datetime.now())}
         for text_to_replace in replacement_mapping:
             replace_text_of_the_message(msg,text_to_replace,replacement_mapping[text_to_replace])
 
