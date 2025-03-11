@@ -11,15 +11,16 @@ RECIEVER_EMAIL=reciever@outlook.com
 
 
 '''
+import os
+import sys
+sys.path.insert(0, os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '../../'))) # NOQA
 from EmailSenderPy.Mongo_db import *
 from EmailSenderPy import Session
 from EmailSenderPy.email_creator import *
 import dotenv
 from CLI_session import CLI_session
-import os
-import sys
-sys.path.insert(0, os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '../../')))
+
 
 
 if __name__ == "__main__":

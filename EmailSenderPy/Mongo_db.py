@@ -11,7 +11,8 @@ DEFAULT_VALUES = {"subscribed": True,
                   "started_typing": False,
                   "organisation": "unknown",
                   "date_of_visit": "None",
-                  "date_of_email": "None"}
+                  "date_of_email": "None",
+                  "user_state": 0}
 
 ENABLE_LOGGING = True
 
