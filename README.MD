@@ -22,10 +22,6 @@ Keep in mind that you need to set everything up in the enviorment variables or i
             SENDER_EMAIL_PASSWORD = <password for this email>
             READER_EMAIL_PORT = <IMAP port (mostly 993)>
             SERVER_READER_EMAIL = <IMAP server email of your email provider>
-
-            SUBJECT = <subject of your email>
-            EMAIL_CONTENTS_PATH_TXT = <Path/to/your/email.txt>
-            EMAIL_CONTENTS_PATH_HTML = <Path/to/your/email.html>
 ```
 
 ### How to install as a package?
