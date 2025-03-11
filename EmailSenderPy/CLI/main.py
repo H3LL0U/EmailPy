@@ -11,43 +11,40 @@ RECIEVER_EMAIL=reciever@outlook.com
 
 
 '''
+from EmailSenderPy.Mongo_db import *
+from EmailSenderPy import Session
+from EmailSenderPy.email_creator import *
+import dotenv
+from CLI_session import CLI_session
 import os
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-from CLI_session import CLI_session
-import dotenv
-from EmailSenderPy.email_creator import *
-from EmailSenderPy import Session
-
-from EmailSenderPy.Mongo_db import *
-
+sys.path.insert(0, os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '../../')))
 
 
 if __name__ == "__main__":
 
-    
-    #initialising variables
+    # initialising variables
     dotenv.load_dotenv()
-    config=dotenv.dotenv_values()
-    
+    config = dotenv.dotenv_values()
 
     session = Session(server_email_SMTP=config["SERVER_SENDER_EMAIL"],
-                    server_port_SMTP=config["SENDER_EMAIL_PORT"],
-                    sender_email=config["SENDER_EMAIL"],
-                    sender_password=config["SENDER_EMAIL_PASSWORD"],
-                    mode="w")
-    
+                      server_port_SMTP=config["SENDER_EMAIL_PORT"],
+                      sender_email=config["SENDER_EMAIL"],
+                      sender_password=config["SENDER_EMAIL_PASSWORD"],
+                      mode="w")
+
     reader_session = Session(sender_email=config["READER_EMAIL"],
-                    sender_password=config["READER_EMAIL_PASSWORD"],
-                    server_port_IMAP= config["READER_EMAIL_PORT"],
-                    server_email_IMAP=config["SERVER_READER_EMAIL"], #imap-mail.outlook.com
-                    mode="r")
-    log("Sessions started")   
+                             sender_password=config["READER_EMAIL_PASSWORD"],
+                             server_port_IMAP=config["READER_EMAIL_PORT"],
+                             # imap-mail.outlook.com
+                             server_email_IMAP=config["SERVER_READER_EMAIL"],
+                             mode="r")
+    log("Sessions started")
     database_connection = MongoClient(config["MONGO_DB_LINK"])
 
-    CLI_session(db_connection=database_connection,email_reader_session=reader_session,email_sender_session = session)
+    CLI_session(db_connection=database_connection,
+                email_reader_session=reader_session, email_sender_session=session)
 
-    
     database_connection.close()
     reader_session.terminate()
-        
